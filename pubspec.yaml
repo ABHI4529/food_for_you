@@ -1,0 +1,31 @@
+name: food_for_you
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  firebase_core: ^2.25.3
+  cloud_firestore: ^4.15.3
+  google_sign_in: ^6.2.1
+  shared_preferences: ^2.2.2
+  reflection_effect: ^2.0.0
+  iconsax: ^0.0.8
+  font_awesome_flutter: ^10.7.0
+  firebase_auth: ^4.17.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
