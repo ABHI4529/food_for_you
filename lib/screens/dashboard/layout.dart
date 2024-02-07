@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_for_you/screens/dashboard/explore/explore.dart';
+import 'package:food_for_you/screens/dashboard/history/history.dart';
 import 'package:food_for_you/screens/dashboard/home/home.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -17,7 +18,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: [HomeScreen(), ExploreScreen(), Container()][_selectedIndex],
+      body: [HomeScreen(), ExploreScreen(), HistoryScreen()][_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (value) {
