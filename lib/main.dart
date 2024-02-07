@@ -27,6 +27,18 @@ class MainApp extends StatelessWidget {
               surface: Colors.white,
               onSurface: Colors.black,
             ),
+            appBarTheme: const AppBarTheme(
+                backgroundColor: Color(0xffff0000),
+                titleTextStyle: TextStyle(color: Colors.white, fontSize: 20)),
+            navigationBarTheme: NavigationBarThemeData(
+                backgroundColor: const Color(0xffff0000),
+                labelTextStyle: MaterialStateProperty.all(
+                    const TextStyle(color: Colors.white)),
+                iconTheme: MaterialStateProperty.resolveWith((states) {
+                  if (states.isEmpty) {
+                    return const IconThemeData(color: Colors.white);
+                  }
+                })),
             tabBarTheme: const TabBarTheme(
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelStyle: TextStyle(

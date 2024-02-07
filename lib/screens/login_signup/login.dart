@@ -1,10 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:food_for_you/screens/dashboard/layout.dart';
 import 'package:food_for_you/screens/login_signup/signup.dart';
 import 'package:food_for_you/services/uffAuth.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:reflection_effect/reflection_effect.dart';
+import 'package:food_for_you/services/utils.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -26,77 +27,79 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(
-            height: height / 2,
-            child: ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(bottom: Radius.circular(50)),
-              child: Image.asset(
-                "assets/login_screen.jpg",
-                fit: BoxFit.cover,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(
+              height: height / 2,
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(50)),
+                child: Image.asset(
+                  "assets/login_screen.jpg",
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          SizedBox(
-            height: height / 2,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0.7,
-                    child: SizedBox(
-                      height: 350,
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(50)),
-                        child: Image.asset(
-                          "assets/login_screen.jpg",
-                          fit: BoxFit.cover,
+            SizedBox(
+              height: height / 2,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Opacity(
+                      opacity: 0.7,
+                      child: SizedBox(
+                        height: 350,
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(50)),
+                          child: Image.asset(
+                            "assets/login_screen.jpg",
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            stops: const [
-                          0,
-                          0.3,
-                          0.7
-                        ],
-                            colors: [
-                          Colors.transparent,
-                          Colors.white.withAlpha(150),
-                          Colors.white
-                        ])),
-                    child: Column(children: [
-                      TabBar(controller: _tabController, tabs: const [
-                        Tab(
-                          child: Text("Login"),
-                        ),
-                        Tab(
-                          child: Text("SignUp"),
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              stops: const [
+                            0,
+                            0.3,
+                            0.7
+                          ],
+                              colors: [
+                            Colors.transparent,
+                            Colors.white.withAlpha(150),
+                            Colors.white
+                          ])),
+                      child: Column(children: [
+                        TabBar(controller: _tabController, tabs: const [
+                          Tab(
+                            child: Text("Login"),
+                          ),
+                          Tab(
+                            child: Text("SignUp"),
+                          )
+                        ]),
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabController,
+                            children: const [LoginForm(), SignUpForm()],
+                          ),
                         )
                       ]),
-                      Expanded(
-                        child: TabBarView(
-                          controller: _tabController,
-                          children: const [LoginForm(), SignUpForm()],
-                        ),
-                      )
-                    ]),
-                  ),
-                )
-              ],
-            ),
-          )
-        ],
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -120,11 +123,12 @@ class _LoginFormState extends State<LoginForm> {
         context: context,
         builder: (context) => const Center(child: CircularProgressIndicator()));
 
-    auth.loginWithEmail(
+    final resp = auth.loginWithEmail(
         email: _emailController.text,
         password: _passwordController.text,
         context: context);
-    Navigator.pop(context);
+
+    return resp;
   }
 
   @override
@@ -164,7 +168,17 @@ class _LoginFormState extends State<LoginForm> {
             margin: const EdgeInsets.symmetric(vertical: 10),
             child: FilledButton(
               onPressed: () {
-                login();
+                login().then((value) {
+                  if (value is User) {
+                    saveCreds(value.uid).then((value) {
+                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const DashboardLayout()));
+                    });
+                  }
+                });
               },
               child: const Text("Login"),
             ),
