@@ -2,24 +2,30 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:food_for_you/models/cafe_model.dart';
+import 'package:food_for_you/models/cart_model.dart';
+import 'package:food_for_you/providers/cafe_provider.dart';
+import 'package:food_for_you/providers/cart_provder.dart';
+import 'package:food_for_you/screens/dashboard/history/cart/cart.dart';
+import 'package:food_for_you/screens/dashboard/home/cafe_page/cafe_page.dart';
 import 'package:food_for_you/screens/dashboard/home/search_cafe.dart';
 import 'package:food_for_you/services/utils.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
-
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   String appbarTitle = "Home";
   List<CafeModel> cafes = [];
+  List<CafeModel> finalCafes = [];
   String query = "quantity";
-  int _limit = 10;
+  int _limit = 30;
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
 
@@ -107,11 +113,14 @@ class _HomeScreenState extends State<HomeScreen> {
       final newCafes = await refreshCafes(orderBy: orderBy);
       setState(() {
         cafes.clear(); // Clear previous cafes when loading more
-        cafes.addAll(newCafes.where((element) => element.address!
-            .toLowerCase()
-            .contains(appbarTitle.toLowerCase())));
+        cafes.addAll(newCafes);
+        finalCafes = cafes
+            .where((element) => element.address!
+                .toLowerCase()
+                .contains(appbarTitle.toLowerCase()))
+            .toList();
         _isLoading = false;
-        _limit += 10;
+        _limit += 30;
       });
     }
   }
@@ -149,104 +158,130 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    int cartTotal = ref.watch(cartProvider).length;
     return Scaffold(
-      appBar: AppBar(
-        title: GestureDetector(
-          onTap: () {
-            showModalBottomSheet(
-              context: context,
-              showDragHandle: true,
-              builder: (context) => LocationSheet(
-                onClose: () {
-                  _refreshCafes();
+        appBar: AppBar(
+          title: GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                showDragHandle: true,
+                builder: (context) => LocationSheet(
+                  onClose: () {
+                    _refreshCafes();
+                  },
+                ),
+              ).then((value) => checkLocation());
+            },
+            child: appbarTitle == ""
+                ? const Text('Add Location')
+                : Text(appbarTitle),
+          ),
+          bottom: AppBar(
+            title: Hero(
+              tag: "search",
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SearchCafes()));
                 },
-              ),
-            ).then((value) => checkLocation());
-          },
-          child: appbarTitle == ""
-              ? const Text('Add Location')
-              : Text(appbarTitle),
-        ),
-        bottom: AppBar(
-          title: Hero(
-            tag: "search",
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SearchCafes()));
-              },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(5)),
-                child: const Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.search,
-                      color: CupertinoColors.placeholderText,
-                    ),
-                    Text(
-                      "  Search",
-                      style: TextStyle(
-                          color: CupertinoColors.placeholderText, fontSize: 16),
-                    )
-                  ],
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(5)),
+                  child: const Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.search,
+                        color: CupertinoColors.placeholderText,
+                      ),
+                      Text(
+                        "  Search",
+                        style: TextStyle(
+                            color: CupertinoColors.placeholderText,
+                            fontSize: 16),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: IconButton(
+                  color: Colors.white,
+                  onPressed: () {
+                    filter();
+                  },
+                  icon: const Icon(Iconsax.filter),
+                ),
+              ),
+            ],
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: IconButton(
-                color: Colors.white,
-                onPressed: () {
-                  filter();
+        ),
+        body: Column(
+          children: [
+            Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+              child: Text("Filtered by: $query"),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await _refreshCafes(orderBy: query);
                 },
-                icon: const Icon(Iconsax.filter),
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  itemCount: finalCafes.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index < finalCafes.length) {
+                      return InkWell(
+                          onTap: () {
+                            ref.read(CafeProvider.notifier).state.cafeName =
+                                finalCafes[index].address;
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CafePage(
+                                        cafeModel: finalCafes[index])));
+                          },
+                          child: CafeCard(cafe: finalCafes[index]));
+                    } else {
+                      return _buildLoadMoreIndicator();
+                    }
+                  },
+                ),
               ),
             ),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          Container(
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-            child: Text("Filtered by: $query"),
+        floatingActionButton: Badge(
+          label: Text(ref.watch(cartProvider).length.toString()),
+          child: FloatingActionButton(
+            child: const Icon(Iconsax.bag),
+            onPressed: () {
+              ref.read(CafeProvider.notifier).state.items = ref
+                  .watch(cartProvider)
+                  .map((e) => Items.fromJson(e))
+                  .toList();
+
+              if (ref.watch(cartProvider).isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("No Items in the cart")));
+              } else {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const CartPage()));
+              }
+            },
           ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                await _refreshCafes(orderBy: query);
-              },
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                itemCount: cafes
-                        .where((element) => element.address!
-                            .toLowerCase()
-                            .contains(appbarTitle.toLowerCase()))
-                        .length +
-                    1,
-                itemBuilder: (context, index) {
-                  if (index < cafes.length) {
-                    return CafeCard(cafe: cafes[index]);
-                  } else {
-                    return _buildLoadMoreIndicator();
-                  }
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 
   Widget _buildLoadMoreIndicator() {

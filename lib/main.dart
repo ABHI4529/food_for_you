@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:food_for_you/splash.dart';
 
-import 'screens/login_signup/login.dart';
-
 void main() {
-  runApp(const MainApp());
+  runApp(const ProviderScope(child: MainApp()));
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends ConsumerStatefulWidget {
   const MainApp({super.key});
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _MailAppState();
+}
 
+class _MailAppState extends ConsumerState<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,6 +31,7 @@ class MainApp extends StatelessWidget {
               onSurface: Colors.black,
             ),
             appBarTheme: const AppBarTheme(
+                iconTheme: IconThemeData(color: Colors.white),
                 backgroundColor: Color(0xffff0000),
                 titleTextStyle: TextStyle(color: Colors.white, fontSize: 20)),
             navigationBarTheme: NavigationBarThemeData(

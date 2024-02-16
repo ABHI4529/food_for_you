@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_for_you/screens/dashboard/explore/explore.dart';
 import 'package:food_for_you/screens/dashboard/history/history.dart';
 import 'package:food_for_you/screens/dashboard/home/home.dart';
 import 'package:iconsax/iconsax.dart';
 
-class DashboardLayout extends StatefulWidget {
+class DashboardLayout extends ConsumerStatefulWidget {
   const DashboardLayout({super.key});
-
   @override
-  State<DashboardLayout> createState() => _DashboardLayoutState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _DashboardLayoutState();
 }
 
-class _DashboardLayoutState extends State<DashboardLayout> {
+class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
   int _selectedIndex = 0;
 
   @override
