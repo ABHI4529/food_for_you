@@ -22,7 +22,10 @@ class _SearchCafesState extends State<SearchCafes> {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('cafes')
           .orderBy("address")
-          .startAt([address]).endAt(['$address\uf8ff']).get();
+          .startAt([address])
+          .endAt(['$address\uf8ff'])
+          .limit(10)
+          .get();
 
       List<CafeModel> cafes = querySnapshot.docs.map((doc) {
         return CafeModel.fromJson(doc.data() as Map<String, dynamic>);

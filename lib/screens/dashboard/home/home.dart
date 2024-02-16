@@ -44,7 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
       showModalBottomSheet(
         context: context,
         showDragHandle: true,
-        builder: (context) => const LocationSheet(),
+        builder: (context) => LocationSheet(
+          onClose: () {
+            _refreshCafes();
+          },
+        ),
       );
     }
   }
@@ -103,7 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final newCafes = await refreshCafes(orderBy: orderBy);
       setState(() {
         cafes.clear(); // Clear previous cafes when loading more
-        cafes.addAll(newCafes);
+        cafes.addAll(newCafes.where((element) => element.address!
+            .toLowerCase()
+            .contains(appbarTitle.toLowerCase())));
         _isLoading = false;
         _limit += 10;
       });
@@ -150,10 +156,16 @@ class _HomeScreenState extends State<HomeScreen> {
             showModalBottomSheet(
               context: context,
               showDragHandle: true,
-              builder: (context) => const LocationSheet(),
+              builder: (context) => LocationSheet(
+                onClose: () {
+                  _refreshCafes();
+                },
+              ),
             ).then((value) => checkLocation());
           },
-          child: Text(appbarTitle),
+          child: appbarTitle == ""
+              ? const Text('Add Location')
+              : Text(appbarTitle),
         ),
         bottom: AppBar(
           title: Hero(
@@ -216,7 +228,12 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 15),
-                itemCount: cafes.length + 1,
+                itemCount: cafes
+                        .where((element) => element.address!
+                            .toLowerCase()
+                            .contains(appbarTitle.toLowerCase()))
+                        .length +
+                    1,
                 itemBuilder: (context, index) {
                   if (index < cafes.length) {
                     return CafeCard(cafe: cafes[index]);
@@ -360,7 +377,8 @@ class CafeCard extends StatelessWidget {
 }
 
 class LocationSheet extends StatefulWidget {
-  const LocationSheet({super.key});
+  const LocationSheet({super.key, required this.onClose});
+  final Function onClose;
 
   @override
   State<LocationSheet> createState() => _LocationSheetState();
@@ -396,6 +414,7 @@ class _LocationSheetState extends State<LocationSheet> {
             child: FilledButton(
                 onPressed: () {
                   saveLocation();
+                  widget.onClose();
                   Navigator.pop(context);
                 },
                 child: const Text("Set Location")),
