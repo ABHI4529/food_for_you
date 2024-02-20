@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:food_for_you/models/cafe_model.dart';
@@ -13,6 +18,7 @@ import 'package:food_for_you/screens/dashboard/home/search_cafe.dart';
 import 'package:food_for_you/services/utils.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -24,12 +30,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String appbarTitle = "";
   List<CafeModel> cafes = [];
   List<CafeModel> finalCafes = [];
-  String query = "quantity";
+  String query = "";
   int _limit = 30;
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
 
   final filters = [
+    {"label": "None", "value": ""},
     {"label": "Quantity", "value": "quantity"},
     {"label": "Quality", "value": "qualtity"},
     {"label": "Ambience", "value": "ambience"},
@@ -66,32 +73,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder: (context) {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Filter",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const Text("Filter cafes according to your preferences"),
-              const SizedBox(height: 20),
-              ListView(
-                shrinkWrap: true,
-                children: filters
-                    .map((e) => ListTile(
-                          leading: query == e['value']
-                              ? const Icon(Icons.check)
-                              : const Text(""),
-                          title: Text("${e['label']}"),
-                          onTap: () {
-                            setState(() => query = "${e['value']}");
-                            _refreshCafes(orderBy: query);
-                            Navigator.pop(context);
-                          },
-                        ))
-                    .toList(),
-              ),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Filter",
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Text("Filter cafes according to your preferences"),
+                const SizedBox(height: 20),
+                ListView(
+                  shrinkWrap: true,
+                  children: filters
+                      .map((e) => ListTile(
+                            leading: query == e['value']
+                                ? const Icon(Icons.check)
+                                : const Text(""),
+                            title: Text("${e['label']}"),
+                            onTap: () {
+                              setState(() => query = "${e['value']}");
+                              _refreshCafes(orderBy: query);
+                              Navigator.pop(context);
+                            },
+                          ))
+                      .toList(),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -105,7 +114,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await _loadMoreCafes(orderBy: orderBy);
   }
 
-  Future<void> _loadMoreCafes({String orderBy = 'quantity'}) async {
+  Future<void> _loadMoreCafes({String orderBy = ''}) async {
     if (!_isLoading) {
       setState(() {
         _isLoading = true;
@@ -125,13 +134,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  Future<List<CafeModel>> refreshCafes({String orderBy = 'quantity'}) async {
-    Query query = FirebaseFirestore.instance.collection("cafes").limit(_limit);
-    query = query.orderBy(orderBy, descending: true);
-    final querySnapshot = await query.get();
-    return querySnapshot.docs
-        .map((doc) => CafeModel.fromJson(doc.data() as Map<String, dynamic>))
-        .toList();
+  Future<List<CafeModel>> refreshCafes({String orderBy = ''}) async {
+    Query query = FirebaseFirestore.instance.collection("cafes");
+    if (orderBy == '') {
+      final querySnapshot = await query.get();
+      return querySnapshot.docs
+          .map((doc) => CafeModel.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+    } else {
+      query = query.orderBy(orderBy, descending: true);
+      final querySnapshot = await query.get();
+      return querySnapshot.docs
+          .map((doc) => CafeModel.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+    }
+  }
+
+  Color getRandomColor() {
+    Random random = Random();
+    return Color.fromRGBO(
+      random.nextInt(256),
+      random.nextInt(256),
+      random.nextInt(256),
+      1.0,
+    );
+  }
+
+  Future fetchPost(int images) async {
+    final response = await http.get(
+        Uri.parse(
+            "https://api.pexels.com/v1/search?query=cafes&per_page=$images"),
+        headers: {
+          'Authorization':
+              '563492ad6f91700001000001db3b8493375f44f5b5cf0c9cccc442fe'
+        });
+
+    final data = jsonDecode(response.body);
+    Clipboard.setData(data);
+    return data['photos'];
   }
 
   @override
@@ -234,7 +274,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Container(
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-              child: Text("Filtered by: $query"),
+              child: Text("Filtered by: ${query == "" ? 'None' : query}"),
             ),
             Expanded(
               child: RefreshIndicator(
@@ -257,7 +297,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     builder: (context) => CafePage(
                                         cafeModel: finalCafes[index])));
                           },
-                          child: CafeCard(cafe: finalCafes[index]));
+                          child: CafeCard(
+                            cafe: finalCafes[index],
+                            imageUrl: getRandomColor(),
+                          ));
                     } else {
                       return _buildLoadMoreIndicator();
                     }
@@ -297,12 +340,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 class CafeCard extends StatelessWidget {
-  const CafeCard({
-    super.key,
-    required this.cafe,
-  });
+  const CafeCard({super.key, required this.cafe, required this.imageUrl});
 
   final CafeModel cafe;
+  final Color imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -323,9 +364,13 @@ class CafeCard extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 5, right: 10),
                   height: 140,
                   width: 100,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(10)),
+                      color: imageUrl, borderRadius: BorderRadius.circular(10)),
+                  child: Text(
+                    cafe.address!.substring(0, 1),
+                    style: const TextStyle(fontSize: 34, color: Colors.white),
+                  ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -491,7 +536,7 @@ class _LocationSheetState extends State<LocationSheet> {
                 },
                 child: const Text("Set Location")),
           ),
-          const Spacer()
+          const Spacer(),
         ],
       ),
     );

@@ -56,7 +56,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
             return FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
-                  initialCenter: snapshot.data,
+                  initialCenter: snapshot.data == null
+                      ? LatLng(19.08, 72.88)
+                      : snapshot.data,
                   initialZoom: 9.2,
                 ),
                 children: [
