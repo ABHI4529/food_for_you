@@ -21,7 +21,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  String appbarTitle = "Home";
+  String appbarTitle = "";
   List<CafeModel> cafes = [];
   List<CafeModel> finalCafes = [];
   String query = "quantity";
@@ -161,22 +161,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     int cartTotal = ref.watch(cartProvider).length;
     return Scaffold(
         appBar: AppBar(
-          title: GestureDetector(
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                showDragHandle: true,
-                builder: (context) => LocationSheet(
-                  onClose: () {
-                    _refreshCafes();
-                  },
-                ),
-              ).then((value) => checkLocation());
-            },
-            child: appbarTitle == ""
-                ? const Text('Add Location')
-                : Text(appbarTitle),
-          ),
+          title: const Text("Food For You"),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: FilledButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    showDragHandle: true,
+                    builder: (context) => LocationSheet(
+                      onClose: () {
+                        _refreshCafes();
+                      },
+                    ),
+                  ).then((value) => checkLocation());
+                },
+                child: appbarTitle == ""
+                    ? const Text('Add Location')
+                    : Text(appbarTitle),
+              ),
+            ),
+          ],
           bottom: AppBar(
             title: Hero(
               tag: "search",
@@ -316,9 +322,11 @@ class CafeCard extends StatelessWidget {
               children: [
                 Container(
                   margin: const EdgeInsets.only(top: 5, right: 10),
-                  height: 100,
+                  height: 140,
                   width: 100,
-                  color: Theme.of(context).primaryColor,
+                  decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.circular(10)),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,6 +406,36 @@ class CafeCard extends StatelessWidget {
                           ignoreGestures: true,
                           onRatingUpdate: (rating) {},
                         ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Text("Texture"),
+                        const SizedBox(
+                          width: 64,
+                        ),
+                        RatingBar.builder(
+                          itemSize: 20,
+                          initialRating: double.parse("${cafe.texture}"),
+                          itemBuilder: (context, _) => const Icon(
+                            Iconsax.star,
+                            color: Color(0xffdada00),
+                            size: 15,
+                          ),
+                          ignoreGestures: true,
+                          onRatingUpdate: (rating) {},
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Text("Spice"),
+                        const SizedBox(
+                          width: 74,
+                        ),
+                        Row(
+                            children: List.generate(
+                                cafe.spicy!, (index) => const Text("🌶️ ")))
                       ],
                     )
                   ],

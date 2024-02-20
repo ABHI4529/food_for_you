@@ -90,7 +90,7 @@ class _CafePageState extends ConsumerState<CafePage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "₹ ${e['item_price']}",
+                                  "₹ ${e['item_price'].ceil()}",
                                   overflow: TextOverflow.fade,
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,

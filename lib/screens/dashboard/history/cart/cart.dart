@@ -1,7 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:food_for_you/models/order_model.dart';
 import 'package:food_for_you/providers/cafe_provider.dart';
+import 'package:food_for_you/providers/cart_provder.dart';
+import 'package:food_for_you/services/uff_database.dart';
+import 'package:food_for_you/services/utils.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:collection/collection.dart';
 
@@ -42,7 +46,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                 return CupertinoListTile(
                   title: Text("${e.itemName}"),
                   subtitle: Text("${e.itemDescription}"),
-                  trailing: Text("₹ ${e.itemPrice}"),
+                  trailing: Text("₹ ${e.itemPrice!.ceil()}"),
                 );
               }).toList(),
             ),
@@ -50,7 +54,7 @@ class _CartPageState extends ConsumerState<CartPage> {
               padding: const EdgeInsets.symmetric(horizontal: 15),
               alignment: Alignment.centerRight,
               child: Text(
-                "Total : ₹ ${rates.sum.toStringAsFixed(2)}",
+                "Total : ₹ ${rates.sum.ceil()}",
                 style: const TextStyle(
                   fontSize: 18,
                 ),
@@ -60,7 +64,29 @@ class _CartPageState extends ConsumerState<CartPage> {
         ),
       ),
       floatingActionButton: FilledButton(
-        onPressed: () {},
+        onPressed: () {
+          try {
+            getUserId().then((value) {
+              final order = OrderModel(
+                  cafeName: cart.cafeName,
+                  items: cart.items,
+                  isComplete: false,
+                  orderUpdate: "placed",
+                  orderId: value + "uff",
+                  userId: value,
+                  orderTime: DateTime.now());
+
+              final database = UffDataBase();
+              database.createOrder(context, order).then((value) {
+                ref.read(cartProvider.notifier).state.clear();
+                Navigator.pop(context);
+              });
+            });
+          } catch (e) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text("$e")));
+          }
+        },
         child: const Text("Checkout"),
       ),
     );
