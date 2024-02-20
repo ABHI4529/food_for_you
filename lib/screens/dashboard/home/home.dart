@@ -150,8 +150,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _scrollListener() {
     if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
+        _scrollController.position.maxScrollExtent - 700) {
       _loadMoreCafes(orderBy: query);
     }
   }
