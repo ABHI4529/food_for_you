@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:food_for_you/models/cart_model.dart';
 import 'package:food_for_you/models/order_model.dart';
 import 'package:food_for_you/screens/dashboard/history/order/order_page.dart';
+import 'package:food_for_you/screens/dashboard/history/recommendation/recommendation.dart';
 import 'package:food_for_you/services/uffAuth.dart';
 import 'package:food_for_you/services/uff_database.dart';
 import 'package:iconsax/iconsax.dart';
@@ -28,12 +29,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
           PopupMenuButton(
             itemBuilder: (context) => [
               PopupMenuItem(
+                child: const Text("Suggect a Cafe"),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RecommendationScreen()));
+                },
+              ),
+              PopupMenuItem(
                 child: const Text("Logout"),
                 onTap: () {
                   final auth = Auth();
                   auth.logoutAccount(context);
                 },
-              )
+              ),
             ],
           ),
         ],
