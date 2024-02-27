@@ -86,7 +86,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
                     const Text("Review"),
                     CupertinoTextField(
                       controller: reviewController,
-                      maxLines: 3,
+                      maxLines: 4,
                     ),
                   ],
                 ),
@@ -99,7 +99,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
         onPressed: () async {
           if (reviewController.text != "") {
             await FirebaseFirestore.instance.collection("reviews").doc().set({
-              "reivew": reviewController.text,
+              "review": reviewController.text,
               "rating": rating,
               "cafe_name": widget.orderModel.cafeName,
               "order_id": widget.orderId,

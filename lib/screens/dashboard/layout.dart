@@ -24,7 +24,7 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
         HomeScreen(),
         ExploreScreen(),
         HistoryScreen(),
-        // ReviewScreen()
+        ReviewScreen()
       ][_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
@@ -39,7 +39,7 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
               icon: FaIcon(FontAwesomeIcons.compass), label: "Explore"),
           NavigationDestination(
               icon: Icon(Iconsax.document_text), label: "History"),
-          // NavigationDestination(icon: Icon(Iconsax.note), label: "Reviews")
+          NavigationDestination(icon: Icon(Iconsax.note), label: "Reviews")
         ],
       ),
     );

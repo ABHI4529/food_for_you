@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:food_for_you/models/order_model.dart';
 import 'package:food_for_you/models/suggestion_model.dart';
 import 'package:food_for_you/services/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UffDataBase {
   final orderCollection = FirebaseFirestore.instance.collection("orders");
@@ -42,10 +43,16 @@ class UffDataBase {
         .limit(1)
         .get();
 
+    final preferences = await SharedPreferences.getInstance();
+    final location = preferences.getString('location');
+
     if (orders.docs.isEmpty) {
-      final cafes =
-          await FirebaseFirestore.instance.collection("cafes").limit(5).get();
-      return cafes.docs;
+      final cafes = await FirebaseFirestore.instance.collection("cafes").get();
+      return cafes.docs
+          .where((element) => element['address']
+              .toLowerCase()
+              .contains(location!.toLowerCase()))
+          .toList();
     } else {
       final initialCafe = await FirebaseFirestore.instance
           .collection("cafes")
@@ -57,9 +64,15 @@ class UffDataBase {
           .collection("cafes")
           .where("ambience", isGreaterThan: initialCafe.docs[0]['ambience'])
           .orderBy('ambience', descending: true)
-          .limit(5)
           .get();
-      return cafes.docs;
+
+      final finalCafes = cafes.docs
+          .where((element) => element['address']
+              .toLowerCase()
+              .contains(location!.toLowerCase()))
+          .toList();
+
+      return finalCafes;
     }
   }
 
