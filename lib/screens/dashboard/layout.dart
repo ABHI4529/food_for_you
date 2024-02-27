@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:food_for_you/screens/dashboard/explore/explore.dart';
 import 'package:food_for_you/screens/dashboard/history/history.dart';
 import 'package:food_for_you/screens/dashboard/home/home.dart';
+import 'package:food_for_you/screens/dashboard/reviews/reviews.dart';
 import 'package:iconsax/iconsax.dart';
 
 class DashboardLayout extends ConsumerStatefulWidget {
@@ -19,7 +20,12 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: [HomeScreen(), ExploreScreen(), HistoryScreen()][_selectedIndex],
+      body: const [
+        HomeScreen(),
+        ExploreScreen(),
+        HistoryScreen(),
+        // ReviewScreen()
+      ][_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (value) {
@@ -32,7 +38,8 @@ class _DashboardLayoutState extends ConsumerState<DashboardLayout> {
           NavigationDestination(
               icon: FaIcon(FontAwesomeIcons.compass), label: "Explore"),
           NavigationDestination(
-              icon: Icon(Iconsax.document_text), label: "History")
+              icon: Icon(Iconsax.document_text), label: "History"),
+          // NavigationDestination(icon: Icon(Iconsax.note), label: "Reviews")
         ],
       ),
     );

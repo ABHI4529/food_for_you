@@ -2,12 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:food_for_you/models/order_model.dart';
+import 'package:food_for_you/screens/dashboard/reviews/write_review.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:collection/collection.dart';
 
 class OrderHistory extends ConsumerStatefulWidget {
-  const OrderHistory({super.key, required this.orderModel});
+  const OrderHistory(
+      {super.key, required this.orderModel, required this.orderId});
   final OrderModel orderModel;
+  final String orderId;
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _OrderHistoryState();
 }
@@ -57,7 +60,16 @@ class _OrderHistoryState extends ConsumerState<OrderHistory> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 15),
               child: FilledButton(
-                  onPressed: () {}, child: const Text("Write Review")),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => WriteReviewScreen(
+                                  orderId: widget.orderId,
+                                  orderModel: widget.orderModel,
+                                )));
+                  },
+                  child: const Text("Write Review")),
             )
           ],
         ),

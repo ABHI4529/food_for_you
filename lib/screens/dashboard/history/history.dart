@@ -77,7 +77,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   showModalBottomSheet(
                       context: context,
                       showDragHandle: true,
-                      builder: (context) => OrderHistory(orderModel: order));
+                      builder: (context) => OrderHistory(
+                            orderModel: order,
+                            orderId: snapshot.data[index].id,
+                          ));
                 },
                 child: Card(
                   child: Container(

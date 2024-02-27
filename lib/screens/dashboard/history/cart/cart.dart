@@ -84,14 +84,13 @@ class _CartPageState extends ConsumerState<CartPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text("Arriving By : "),
+                        const Text("Time Slot : "),
                         Text(Jiffy.parseFromDateTime(DateTime(
-                                    currentDate.year,
-                                    currentDate.month,
-                                    currentDate.day,
-                                    currentTime.hour,
-                                    currentTime.minute)
-                                .add(const Duration(minutes: 25)))
+                                currentDate.year,
+                                currentDate.month,
+                                currentDate.day,
+                                currentTime.hour,
+                                currentTime.minute))
                             .format(pattern: "hh : mm aa")),
                       ],
                     )),
