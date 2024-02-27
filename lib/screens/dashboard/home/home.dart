@@ -15,6 +15,7 @@ import 'package:food_for_you/providers/cart_provder.dart';
 import 'package:food_for_you/screens/dashboard/history/cart/cart.dart';
 import 'package:food_for_you/screens/dashboard/home/cafe_page/cafe_page.dart';
 import 'package:food_for_you/screens/dashboard/home/search_cafe.dart';
+import 'package:food_for_you/services/uff_database.dart';
 import 'package:food_for_you/services/utils.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -174,6 +175,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return data['photos'];
   }
 
+  final database = UffDataBase();
+
   @override
   void initState() {
     super.initState();
@@ -269,46 +272,84 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           ),
         ),
-        body: Column(
-          children: [
-            Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-              child: Text("Filtered by: ${query == "" ? 'None' : query}"),
-            ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  await _refreshCafes(orderBy: query);
-                },
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  itemCount: finalCafes.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index < finalCafes.length) {
-                      return InkWell(
-                          onTap: () {
-                            ref.read(CafeProvider.notifier).state.cafeName =
-                                finalCafes[index].address;
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => CafePage(
-                                        cafeModel: finalCafes[index])));
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                alignment: Alignment.centerLeft,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                child: Text("Filtered by: ${query == "" ? 'None' : query}"),
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                child: Card(
+                  color: const Color(0xfff50400).withAlpha(50),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Recommended Cafes",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        FutureBuilder(
+                          future: database.getOrderRecommendation(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData || snapshot.hasError) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: snapshot.data!.map((e) {
+                                  final cafe = CafeModel.fromJson(
+                                      e.data() as Map<String, dynamic>);
+                                  return CafeCard(
+                                      cafe: cafe, imageUrl: getRandomColor());
+                                }).toList(),
+                              ),
+                            );
                           },
-                          child: CafeCard(
-                            cafe: finalCafes[index],
-                            imageUrl: getRandomColor(),
-                          ));
-                    } else {
-                      return _buildLoadMoreIndicator();
-                    }
-                  },
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
+              ListView.builder(
+                controller: _scrollController,
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                itemCount: finalCafes.length + 1,
+                itemBuilder: (context, index) {
+                  if (index < finalCafes.length) {
+                    return InkWell(
+                        onTap: () {
+                          ref.read(CafeProvider.notifier).state.cafeName =
+                              finalCafes[index].address;
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      CafePage(cafeModel: finalCafes[index])));
+                        },
+                        child: CafeCard(
+                          cafe: finalCafes[index],
+                          imageUrl: getRandomColor(),
+                        ));
+                  } else {
+                    return _buildLoadMoreIndicator();
+                  }
+                },
+              ),
+            ],
+          ),
         ),
         floatingActionButton: Badge(
           label: Text(ref.watch(cartProvider).length.toString()),

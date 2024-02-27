@@ -8,6 +8,7 @@ import 'package:food_for_you/services/uff_database.dart';
 import 'package:food_for_you/services/utils.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:collection/collection.dart';
+import 'package:jiffy/jiffy.dart';
 
 class CartPage extends ConsumerStatefulWidget {
   const CartPage({super.key});
@@ -16,6 +17,9 @@ class CartPage extends ConsumerStatefulWidget {
 }
 
 class _CartPageState extends ConsumerState<CartPage> {
+  var currentTime = TimeOfDay.now();
+  var currentDate = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
     final cart = ref.watch(CafeProvider);
@@ -58,6 +62,38 @@ class _CartPageState extends ConsumerState<CartPage> {
                 style: const TextStyle(
                   fontSize: 18,
                 ),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 80),
+              child: FilledButton(
+                onPressed: () {},
+                child: FilledButton(
+                    onPressed: () async {
+                      final time = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay(
+                              hour: currentTime.hour,
+                              minute: currentTime.minute + 30));
+                      if (time != null) {
+                        setState(() {
+                          currentTime = time;
+                        });
+                      }
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Arriving By : "),
+                        Text(Jiffy.parseFromDateTime(DateTime(
+                                currentDate.year,
+                                currentDate.month,
+                                currentDate.day,
+                                currentTime.hour,
+                                currentTime.minute + 30))
+                            .format(pattern: "hh : MM aa")),
+                      ],
+                    )),
               ),
             )
           ],

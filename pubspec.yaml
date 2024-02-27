@@ -26,6 +26,7 @@ dependencies:
   riverpod_annotation: ^2.3.4
   http: ^1.2.0
   jiffy: ^6.2.2
+  google_maps_flutter: ^2.5.3
   cached_network_image: ^3.3.1
 
 dev_dependencies:

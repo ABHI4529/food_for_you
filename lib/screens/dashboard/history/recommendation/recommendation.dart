@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:food_for_you/screens/dashboard/history/recommendation/gmap/gmap.dart';
 
 class RecommendationScreen extends ConsumerStatefulWidget {
   const RecommendationScreen({super.key});
@@ -18,7 +19,7 @@ class _RecommendationScreenState extends ConsumerState<RecommendationScreen> {
         ),
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          child: const Wrap(
+          child: Wrap(
             spacing: 10,
             runSpacing: 10,
             children: [
@@ -31,6 +32,15 @@ class _RecommendationScreenState extends ConsumerState<RecommendationScreen> {
               CupertinoTextField(
                 placeholder: "Contact",
               ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const GoogleMapScreen()));
+                },
+                child: const Text("Set Address"),
+              )
             ],
           ),
         ));

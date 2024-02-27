@@ -1,22 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import "package:http/http.dart" as http;
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ExploreScreen extends StatefulWidget {
-  const ExploreScreen({super.key});
-
+class GoogleMapScreen extends ConsumerStatefulWidget {
+  const GoogleMapScreen({super.key});
   @override
-  State<ExploreScreen> createState() => _ExploreScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _GoogleMapScreenState();
 }
 
-class _ExploreScreenState extends State<ExploreScreen> {
-  LatLng latlng = const LatLng(21.146633, 79.088860);
-
+class _GoogleMapScreenState extends ConsumerState<GoogleMapScreen> {
   Future getLatLog(String place) async {
     var response = await http.get(Uri.parse(
         "https://geocode.maps.co/search?q=$place&api_key=65d4986159a87559635919yeu39cc3e"));
@@ -31,6 +29,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
     }
   }
 
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
+
   Future getLocation() async {
     final preferences = await SharedPreferences.getInstance();
     final location = preferences.getString('location');
@@ -39,53 +40,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
     return values;
   }
 
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
-
-  Future fetchLatLngFromGoogleMapsUrl(String url) async {
-    String placeId = url.split("/")[5];
-
-    String apiKey = "AIzaSyBAEtQdm5dFOGSqaFFbOjv8Zm6VYH4p7N8";
-    String requestUrl =
-        "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey";
-
-    var response = await http.get(Uri.parse(requestUrl));
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-
-      double lat = data['result']['geometry']['location']['lat'];
-      double lng = data['result']['geometry']['location']['lng'];
-
-      return LatLng(lat, lng);
-    }
-
-    return "Error";
-  }
-
-  List finalCafes = [];
-
-  Future getLocationCafes() async {
-    final preferences = await SharedPreferences.getInstance();
-    final location = preferences.getString('location');
-    final query = await FirebaseFirestore.instance.collection("cafes").get();
-    if (location != null || location != "") {
-      finalCafes = query.docs
-          .where((element) => element[0]['address']!
-              .toLowerCase()
-              .contains(location!.toLowerCase()))
-          .toList();
-    }
-    return query.docs;
-  }
-
   List<Marker> markers = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Explore"),
+        title: const Text("Select Address"),
       ),
       body: FutureBuilder(
           future: getLocation(),
