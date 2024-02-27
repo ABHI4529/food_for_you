@@ -17,18 +17,20 @@ class ExploreScreen extends StatefulWidget {
 class _ExploreScreenState extends State<ExploreScreen> {
   LatLng latlng = const LatLng(21.146633, 79.088860);
 
-  Future getLatLog(String place) async {
+  Future<LatLng> getLatLog(String place) async {
+    const apiKey = "AIzaSyBAEtQdm5dFOGSqaFFbOjv8Zm6VYH4p7N8";
+
     var response = await http.get(Uri.parse(
-        "https://geocode.maps.co/search?q=$place&api_key=65d4986159a87559635919yeu39cc3e"));
+        "https://maps.googleapis.com/maps/api/geocode/json?address=$place&key=$apiKey"));
+    var mapData = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      var mapData = jsonDecode(response.body);
       // _mapController.move(
       //     LatLng(
       //         double.parse(mapData[0]['lat']), double.parse(mapData[0]['lon'])),
       //     10.5);
-      return LatLng(
-          double.parse(mapData[0]['lat']), double.parse(mapData[0]['lon']));
     }
+    return LatLng(mapData['results'][0]['geometry']['location']['lat'],
+        mapData['results'][0]['geometry']['location']['lng']);
   }
 
   Future getLocation() async {
@@ -42,40 +44,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  Future fetchLatLngFromGoogleMapsUrl(String url) async {
-    String placeId = url.split("/")[5];
-
-    String apiKey = "AIzaSyBAEtQdm5dFOGSqaFFbOjv8Zm6VYH4p7N8";
-    String requestUrl =
-        "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey";
-
-    var response = await http.get(Uri.parse(requestUrl));
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-
-      double lat = data['result']['geometry']['location']['lat'];
-      double lng = data['result']['geometry']['location']['lng'];
-
-      return LatLng(lat, lng);
-    }
-
-    return "Error";
-  }
-
   List finalCafes = [];
 
-  Future getLocationCafes() async {
+  Future<List<QueryDocumentSnapshot>> getLocationCafes() async {
     final preferences = await SharedPreferences.getInstance();
     final location = preferences.getString('location');
     final query = await FirebaseFirestore.instance.collection("cafes").get();
-    if (location != null || location != "") {
-      finalCafes = query.docs
-          .where((element) => element[0]['address']!
-              .toLowerCase()
-              .contains(location!.toLowerCase()))
-          .toList();
-    }
     return query.docs;
   }
 
@@ -91,18 +65,23 @@ class _ExploreScreenState extends State<ExploreScreen> {
           future: getLocation(),
           builder: (context, snapshot) {
             return GoogleMap(
-              onMapCreated: (GoogleMapController controller) {
+              onMapCreated: (GoogleMapController controller) async {
                 _controller.complete(controller);
+                final cafes =
+                    await FirebaseFirestore.instance.collection("cafes").get();
+                for (var element in cafes.docs) {
+                  if (element['latLng'] != null) {
+                    setState(() {
+                      markers.add(Marker(
+                          markerId: MarkerId(element['address']),
+                          infoWindow: InfoWindow(title: element['address']),
+                          position: LatLng(
+                              element['latLng'][0], element['latLng'][1])));
+                    });
+                  }
+                }
               },
               markers: Set.from(markers),
-              onTap: (argument) {
-                setState(() {
-                  markers.add(Marker(
-                      markerId: const MarkerId("cafe_address"),
-                      position: argument,
-                      infoWindow: const InfoWindow(title: "Cafe Location")));
-                });
-              },
               initialCameraPosition: CameraPosition(
                   zoom: 10,
                   target: snapshot.data ?? const LatLng(19.08, 72.88)),

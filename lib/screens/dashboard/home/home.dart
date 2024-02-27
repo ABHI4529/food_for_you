@@ -310,8 +310,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 children: snapshot.data!.map((e) {
                                   final cafe = CafeModel.fromJson(
                                       e.data() as Map<String, dynamic>);
-                                  return CafeCard(
-                                      cafe: cafe, imageUrl: getRandomColor());
+                                  return InkWell(
+                                    onTap: () {
+                                      ref
+                                          .read(CafeProvider.notifier)
+                                          .state
+                                          .cafeName = e['address'];
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => CafePage(
+                                                  cafeModel: CafeModel.fromJson(
+                                                      e.data() as Map<String,
+                                                          dynamic>))));
+                                    },
+                                    child: CafeCard(
+                                        cafe: cafe, imageUrl: getRandomColor()),
+                                  );
                                 }).toList(),
                               ),
                             );

@@ -74,7 +74,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                           context: context,
                           initialTime: TimeOfDay(
                               hour: currentTime.hour,
-                              minute: currentTime.minute + 30));
+                              minute: currentTime.minute));
                       if (time != null) {
                         setState(() {
                           currentTime = time;
@@ -86,12 +86,13 @@ class _CartPageState extends ConsumerState<CartPage> {
                       children: [
                         const Text("Arriving By : "),
                         Text(Jiffy.parseFromDateTime(DateTime(
-                                currentDate.year,
-                                currentDate.month,
-                                currentDate.day,
-                                currentTime.hour,
-                                currentTime.minute + 30))
-                            .format(pattern: "hh : MM aa")),
+                                    currentDate.year,
+                                    currentDate.month,
+                                    currentDate.day,
+                                    currentTime.hour,
+                                    currentTime.minute)
+                                .add(const Duration(minutes: 25)))
+                            .format(pattern: "hh : mm aa")),
                       ],
                     )),
               ),
@@ -107,6 +108,8 @@ class _CartPageState extends ConsumerState<CartPage> {
                   cafeName: cart.cafeName,
                   items: cart.items,
                   isComplete: false,
+                  deliveryTime: DateTime(currentDate.year, currentDate.month,
+                      currentDate.day, currentTime.hour, currentTime.minute),
                   orderUpdate: "placed",
                   orderId: value + "uff",
                   userId: value,

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:food_for_you/models/cart_model.dart';
 
 class OrderModel {
@@ -7,6 +8,7 @@ class OrderModel {
   String? userId;
   bool? isComplete;
   String? orderUpdate;
+  DateTime? deliveryTime;
   List<Items>? items;
 
   OrderModel(
@@ -14,6 +16,7 @@ class OrderModel {
       this.orderTime,
       this.cafeName,
       this.isComplete,
+      this.deliveryTime,
       this.orderUpdate,
       this.userId,
       this.items});
@@ -22,6 +25,7 @@ class OrderModel {
     orderId = json['order_id'];
     orderTime = json['order_time'];
     userId = json['user_id'];
+    deliveryTime = json['delivery_time'];
     cafeName = json['cafe_name'];
     isComplete = json['isComplete'];
     orderUpdate = json['order_update'];
@@ -37,6 +41,7 @@ class OrderModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['order_id'] = this.orderId;
     data['order_time'] = this.orderTime;
+    data['delivery_time'] = this.deliveryTime;
     data['cafe_name'] = this.cafeName;
     data['isComplete'] = this.isComplete;
     data['user_id'] = this.userId;

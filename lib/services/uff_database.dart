@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:food_for_you/models/order_model.dart';
+import 'package:food_for_you/models/suggestion_model.dart';
 import 'package:food_for_you/services/utils.dart';
 
 class UffDataBase {
@@ -60,5 +61,25 @@ class UffDataBase {
           .get();
       return cafes.docs;
     }
+  }
+
+  Future saveSuggestionData(BuildContext context, suggestion) async {
+    if (suggestion.cafeAddress != "" || suggestion.cafeName != "") {
+      await FirebaseFirestore.instance
+          .collection("suggestions")
+          .doc()
+          .set(suggestion.toJson());
+    }
+    // ignore: use_build_context_synchronously
+    else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid Name or Address")));
+    }
+  }
+
+  Future getUserFromId(String userId) async {
+    final userData =
+        await FirebaseFirestore.instance.collection("users").doc(userId).get();
+    return userData.data();
   }
 }
