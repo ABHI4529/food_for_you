@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:food_for_you/models/cart_model.dart';
 import 'package:food_for_you/models/order_model.dart';
 import 'package:food_for_you/screens/dashboard/history/order/order_page.dart';
+import 'package:food_for_you/screens/dashboard/history/order_summary/order_summary.dart';
 import 'package:food_for_you/screens/dashboard/history/recommendation/recommendation.dart';
 import 'package:food_for_you/services/uffAuth.dart';
 import 'package:food_for_you/services/uff_database.dart';
@@ -38,6 +39,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 },
               ),
               PopupMenuItem(
+                child: const Text("Order Summary"),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const OrderSummary()));
+                },
+              ),
+              PopupMenuItem(
                 child: const Text("Logout"),
                 onTap: () {
                   final auth = Auth();
@@ -55,21 +65,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           return ListView.builder(
-            itemCount: snapshot.data.length,
+            itemCount: snapshot.data?.length,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             itemBuilder: (context, index) {
               final order = OrderModel(
-                  cafeName: snapshot.data[index]['cafe_name'],
-                  isComplete: snapshot.data[index]['isComplete'],
-                  orderId: snapshot.data[index]['order_id'],
-                  items: snapshot.data[index]['items']
+                  cafeName: snapshot.data?[index]['cafe_name'],
+                  isComplete: snapshot.data?[index]['isComplete'],
+                  orderId: snapshot.data?[index]['order_id'],
+                  items: snapshot.data?[index]['items']
                       .map<Items>((e) => Items.fromJson(e))
                       .toList(),
-                  orderTime: snapshot.data[index]['order_time'].toDate(),
-                  orderUpdate: snapshot.data[index]['order_update'],
-                  userId: snapshot.data[index]['user_id']);
+                  orderTime: snapshot.data?[index]['order_time'].toDate(),
+                  orderUpdate: snapshot.data?[index]['order_update'],
+                  userId: snapshot.data?[index]['user_id']);
               List<double> rates = [];
-              snapshot.data[index]['items'].forEach((e) {
+              snapshot.data?[index]['items'].forEach((e) {
                 rates.add(e['item_price']);
               });
               return InkWell(
@@ -79,7 +89,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       showDragHandle: true,
                       builder: (context) => OrderHistory(
                             orderModel: order,
-                            orderId: snapshot.data[index].id,
+                            orderId: snapshot.data![index].id,
                           ));
                 },
                 child: Card(

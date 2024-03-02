@@ -26,7 +26,8 @@ class UffDataBase {
     }
   }
 
-  Future getOrderHistory(BuildContext context) async {
+  Future<List<QueryDocumentSnapshot>> getOrderHistory(
+      BuildContext context) async {
     final userId = await getUserId();
 
     final orders =
