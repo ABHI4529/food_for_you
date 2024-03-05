@@ -114,7 +114,7 @@ class _OrderSummaryState extends ConsumerState<OrderSummary> {
                                 children: [
                                   Text(
                                     Jiffy.parse(order.orderTime!.toString())
-                                        .format(pattern: "EE, dd - mm - yyy"),
+                                        .format(pattern: "EE, dd - MM - yyy"),
                                     style: const TextStyle(
                                         fontSize: 13, color: Colors.grey),
                                   )

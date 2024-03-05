@@ -104,7 +104,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               const Icon(Iconsax.shop),
                               Text(
                                 Jiffy.parse(order.orderTime!.toString())
-                                    .format(pattern: "EE, dd - mm - yyy"),
+                                    .format(pattern: "EE, dd - MM - yyy"),
                                 style: const TextStyle(
                                     fontSize: 13, color: Colors.grey),
                               )
