@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:food_for_you/models/order_model.dart';
+import 'package:food_for_you/screens/dashboard/chat/profiles.dart';
 import 'package:food_for_you/screens/dashboard/reviews/write_review.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:collection/collection.dart';
@@ -57,19 +58,38 @@ class _OrderHistoryState extends ConsumerState<OrderHistory> {
                     const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              child: FilledButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => WriteReviewScreen(
-                                  orderId: widget.orderId,
-                                  orderModel: widget.orderModel,
-                                )));
-                  },
-                  child: const Text("Write Review")),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  child: FilledButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => WriteReviewScreen(
+                                      orderId: widget.orderId,
+                                      orderModel: widget.orderModel,
+                                    )));
+                      },
+                      child: const Text("Write Review")),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  child: FilledButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ProfilesView(
+                                      orderId: widget.orderId,
+                                      orderModel: widget.orderModel,
+                                    )));
+                      },
+                      child: const Text("Share Order")),
+                )
+              ],
             )
           ],
         ),

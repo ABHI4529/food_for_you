@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:food_for_you/models/cart_model.dart';
 import 'package:food_for_you/models/order_model.dart';
+import 'package:food_for_you/screens/dashboard/chat/chat_inbox.dart';
 import 'package:food_for_you/screens/dashboard/history/order/order_page.dart';
 import 'package:food_for_you/screens/dashboard/history/order_summary/order_summary.dart';
 import 'package:food_for_you/screens/dashboard/history/recommendation/recommendation.dart';
@@ -45,6 +46,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => const OrderSummary()));
+                },
+              ),
+              PopupMenuItem(
+                child: const Text("Chat History"),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ChatHistory()));
                 },
               ),
               PopupMenuItem(
