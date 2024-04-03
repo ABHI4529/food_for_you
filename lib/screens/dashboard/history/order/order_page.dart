@@ -9,9 +9,13 @@ import 'package:collection/collection.dart';
 
 class OrderHistory extends ConsumerStatefulWidget {
   const OrderHistory(
-      {super.key, required this.orderModel, required this.orderId});
+      {super.key,
+      required this.orderModel,
+      this.hideButton,
+      required this.orderId});
   final OrderModel orderModel;
   final String orderId;
+  final bool? hideButton;
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _OrderHistoryState();
 }
